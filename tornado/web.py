@@ -182,6 +182,7 @@ class RequestHandler:
         "PATCH",
         "PUT",
         "OPTIONS",
+        "QUERY",
     )
 
     _template_loaders: dict[str, template.BaseLoader] = {}
@@ -1712,7 +1713,7 @@ class RequestHandler:
         # Safe methods are not checked. WebSocket connections (which begin
         # with a GET) are checked separately in WebSocketHandler.get, after
         # prepare().
-        if self.request.method in ("HEAD", "OPTIONS", "GET"):
+        if self.request.method in ("HEAD", "OPTIONS", "GET", "QUERY"):
             return
 
         if self.application.settings.get("xsrf_cookies"):

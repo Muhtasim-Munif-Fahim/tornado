@@ -245,7 +245,7 @@ class SimpleAsyncHTTPClient(AsyncHTTPClient):
 
 
 class _HTTPConnection(httputil.HTTPMessageDelegate):
-    _SUPPORTED_METHODS = {"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"}
+    _SUPPORTED_METHODS = {"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "QUERY"}
 
     def __init__(
         self,
@@ -407,12 +407,13 @@ class _HTTPConnection(httputil.HTTPMessageDelegate):
                 # almost never do. Fail in this case unless the user has
                 # opted out of sanity checks with allow_nonstandard_methods.
                 body_expected = self.request.method in ("POST", "PATCH", "PUT")
+                body_allowed = body_expected or self.request.method == "QUERY"
                 body_present = (
                     self.request.body is not None
                     or self.request.body_producer is not None
                 )
                 if (body_expected and not body_present) or (
-                    body_present and not body_expected
+                    body_present and not body_allowed
                 ):
                     raise ValueError(
                         "Body must %sbe None for method %s (unless "

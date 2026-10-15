@@ -591,7 +591,7 @@ class CurlAsyncHTTPClient(AsyncHTTPClient):
             "PUT": pycurl.UPLOAD,
             "HEAD": pycurl.NOBODY,
         }
-        custom_methods = {"DELETE", "OPTIONS", "PATCH"}
+        custom_methods = {"DELETE", "OPTIONS", "PATCH", "QUERY"}
         for o in curl_options.values():
             curl.setopt(o, False)
         if request.method in curl_options:
@@ -603,13 +603,14 @@ class CurlAsyncHTTPClient(AsyncHTTPClient):
             raise KeyError("unknown method " + request.method)
 
         body_expected = request.method in ("POST", "PATCH", "PUT")
+        body_allowed = body_expected or request.method == "QUERY"
         body_present = request.body is not None
         if not request.allow_nonstandard_methods:
             # Some HTTP methods nearly always have bodies while others
             # almost never do. Fail in this case unless the user has
             # opted out of sanity checks with allow_nonstandard_methods.
             if (body_expected and not body_present) or (
-                body_present and not body_expected
+                body_present and not body_allowed
             ):
                 raise ValueError(
                     "Body must %sbe None for method %s (unless "

@@ -4458,3 +4458,21 @@ class AcceptLanguageTest(WebTestCase):
     def test_accept_language_invalid(self):
         response = self.fetch("/", headers={"Accept-Language": "fr-FR;q=-1"})
         self.assertEqual(response.headers["Content-Language"], "en-US")
+
+
+from tornado.web import Application, RequestHandler
+from tornado.testing import AsyncHTTPTestCase
+
+
+class QueryMethodTest(AsyncHTTPTestCase):
+    def get_app(self):
+        class Handler(RequestHandler):
+            def query(self):
+                self.write("query-ok")
+
+        return Application([("/", Handler)])
+
+    def test_query_method(self):
+        response = self.fetch("/", method="QUERY", body=b"{\"q\":1}")
+        self.assertEqual(response.code, 200)
+        self.assertEqual(response.body, b"query-ok")
